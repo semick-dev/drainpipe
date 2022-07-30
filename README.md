@@ -15,3 +15,17 @@ Where is the best place to intercept that "download" functionality?
 We gotta patch this file. That's the key.
 
 At the end of your test run, upload the resulting directory to your build artifacts. Voila, every single package your build used.
+
+## The strategy
+
+We pick a single bottleneck. Here are the likely locations I've located so far.
+
+
+- `pip._internal.operations.prepare.unpack_url`
+- `pip._internal.network.download._http_get_download`
+
+There is no pip extension methodology that I'm aware of. So the only option is to nuke the site from orbit with the manual file patch. 
+
+I _believe_ the easiest way is to go after `unpack_url` right now.
+
+See an example patched function in `unpack_url.py`
