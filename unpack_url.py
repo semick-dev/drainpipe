@@ -55,9 +55,12 @@ def unpack_url(
 
     ## BEGIN DRAINPIPE CODE
     # shutil and os are already imported by the file containing unpack_url
-    source = file.content_path
+    source = file.path
     target = "REPLACE_ME"
-    shutil.copy(source, target)
+    try:
+        shutil.copy(source, target)
+    except:
+        print("Unable to copy from {} to {}".format(source, target))
     ## END DRAINPIPE CODE
 
     return file

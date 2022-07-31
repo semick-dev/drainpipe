@@ -18,7 +18,7 @@ def patch_function(line_array: List[str], target_dir: str) -> None:
     with open("./unpack_url.py", "r") as f:
         lines = f.readlines()
 
-    lines[58] = lines[58].replace("REPLACE_ME", target_dir)
+    lines[58] = lines[58].replace("REPLACE_ME", target_dir.replace("\\", "/"))
 
     line_array.extend(lines)
 
@@ -71,11 +71,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         "drainpipe",
         description="This package is used to patch and unpatch your current pip directory. "
-        "Failure to provide an output folder will result in no-op.",
+        + "Failure to provide an output folder will result in no-op.",
     )
 
     parser.add_argument("command", choices=["drain", "plug"])
-    parser.add_argument("--dest", help="The targeted directory. If not provided, will fall back to value in")
+    parser.add_argument(
+        "--dest", help="The targeted directory. If not provided, will fall back to value in DRAINPIPE_DIRECTORY."
+    )
     args = parser.parse_args()
 
     if not args.dest:
