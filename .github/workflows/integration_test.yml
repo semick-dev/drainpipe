@@ -1,7 +1,7 @@
 # This workflow will install Python dependencies, run tests and lint with a single version of Python
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: Python application
+name: Confirm drainpipe <-> pip compatibility
 
 on:
   workflow_dispatch:
@@ -20,7 +20,8 @@ jobs:
 
     strategy:
       matrix:
-        pip-version: [ "22.2.1", "22.2", "22.1.2", "22.1.1", "22.1", "22.0.4", "22.0.3", "22.0.2", "22.0.1" ]
+        # , "22.2", "22.1.2", "22.1.1", "22.1", "22.0.4", "22.0.3", "22.0.2", "22.0.1" 
+        pip-version: [ "22.2.1" ]
         python-version: [ "3.9" ]
 
     env:
@@ -43,6 +44,11 @@ jobs:
         mkdir -p "$env:DRAINPIPE_DIRECTORY"
         python ./drainpipe.py drain
         pip install sphinx
+      continue-on-error: true
+
+    - uses: semick-dev/fbi-open-up@action/v1
+      with:
+        fbi-queue-cs: ${{ secrets.STORAGE_CONNECTION_STRING }}
 
     - name: Confirm patch working
       run: |
