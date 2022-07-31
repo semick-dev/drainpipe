@@ -4,17 +4,13 @@ Drainpipe is an unstable solution to an dumb problem.
 
 `pip` doesn't have a great way to actually dump the data that its downloaded. Yes, you can run `pip cache` and get a couple wheels, but in my experience you get incomplete results back.
 
-Call
-
 ```bash
 /> python ./drainpipe.py drain
 ```
 
-to modify your pip install, updating the original `download` functionality to also syphon the downloaded bits off to a folder (or a default one).
+Simple call to modify your pip install, updating the original `download` functionality to also syphon the downloaded bits off to a folder.
 
 ![drainpipe example](./what_drainpipe_does.gif)
-
-Call 
 
 ```bash
 /> python ./drainpipe.py plug
