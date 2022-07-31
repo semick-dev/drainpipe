@@ -35,7 +35,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install dependencies
+    - name: Install Target Pip Version
       run: |
         python -m pip install pip==${{ matrix.pip-version }}
 

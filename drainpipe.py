@@ -1,9 +1,15 @@
 from typing import List
-import pdb, os, sys, argparse
+import os, sys, argparse, glob
 
 
 def locate_current_pip_folder() -> str:
-    return os.path.join(os.path.dirname(sys.executable), "..", "Lib", "site-packages", "pip")
+    python_executable_folder = os.path.abspath(os.path.join(os.path.dirname(sys.executable), ".."))
+
+    for root, dirs, files in os.walk(python_executable_folder, topdown=True):
+        # os.walk traverses top down. The very first directory that matches site-packages/pip
+        # will be the target
+        if os.path.join("site-packages", "pip") in root:
+            return root
 
 
 def locate_target_file() -> str:
