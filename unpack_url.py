@@ -46,12 +46,7 @@ def unpack_url(
 
     # http urls
     else:
-        file = get_http_url(
-            link,
-            download,
-            download_dir,
-            hashes=hashes,
-        )
+        file = get_http_url(link, download, download_dir, hashes=hashes)
 
     # unpack the archive to the build dir location. even when only downloading
     # archives, they have to be unpacked to parse dependencies, except wheels
@@ -61,7 +56,7 @@ def unpack_url(
     ## BEGIN DRAINPIPE CODE
     # shutil and os are already imported by the file containing unpack_url
     source = file.content_path
-    target = os.getenv("DRAINPIPE_DIRECTORY", None)
+    target = "REPLACE_ME"
     shutil.copy(source, target)
     ## END DRAINPIPE CODE
 

@@ -1,8 +1,5 @@
-import shutil
 from typing import List
-
 import pdb, os, sys, argparse
-from subprocess import run
 
 
 def locate_current_pip_folder() -> str:
@@ -17,14 +14,16 @@ def locate_backup_file() -> str:
     return os.path.join(os.path.dirname(locate_target_file()), "prepare_bkp.py")
 
 
-def patch_function(line_array: List[str]) -> None:
+def patch_function(line_array: List[str], target_dir: str) -> None:
     with open("./unpack_url.py", "r") as f:
         lines = f.readlines()
+
+    lines[58] = lines[58].replace("REPLACE_ME", target_dir)
 
     line_array.extend(lines)
 
 
-def patch_pip_file() -> None:
+def patch_pip_file(target_dir: str) -> None:
     prepare_py = locate_target_file()
     append = True
     lines = []
@@ -32,20 +31,20 @@ def patch_pip_file() -> None:
     with open(prepare_py, "r") as f:
         data = f.readlines()
 
-    # take backup!
-    with open(locate_backup_file(), "w") as f:
-        f.writelines(data)
-
-    for line, content in enumerate(data):
+    for line in data:
         if line.startswith("def unpack_url("):
-            patch_function(lines)
+            patch_function(lines, target_dir)
             append = False
 
         if append:
             lines.append(line)
 
-        if line.startswith("    return filename"):
+        if line.startswith("    return file"):
             append = True
+
+    # take backup!
+    with open(locate_backup_file(), "w") as f:
+        f.writelines(data)
 
     with open(prepare_py, "w") as f:
         f.writelines(lines)
@@ -61,13 +60,11 @@ def unpatch_pip_file() -> None:
     with open(prepare_py, "w") as f:
         f.writelines(data)
 
+    os.remove(patch_file)
+
 
 def check_patch_status() -> bool:
-    prepare_py = locate_target_file()
-    with open(prepare_py, "r") as f:
-        lines = f.readlines()
-
-    return "    ## BEGIN DRAINPIPE CODE" in lines
+    return os.path.exists(locate_backup_file())
 
 
 if __name__ == "__main__":
@@ -81,13 +78,24 @@ if __name__ == "__main__":
     parser.add_argument("--dest", help="The targeted directory. If not provided, will fall back to value in")
     args = parser.parse_args()
 
+    if not args.dest:
+        args.dest = os.path.abspath(os.getenv("DRAINPIPE_DIRECTORY"))
+
+    if not args.dest:
+        print(
+            "Drainpipe MUST have a target folder defined either by argument 'dest' or environment variable DRAINPIPE_DIRECTORY."
+        )
+        exit(1)
+
     if args.command == "drain":
         if not check_patch_status():
-            patch_pip_file()
+            patch_pip_file(args.dest)
+            print('Draining pip downloads to "{}"'.format(args.dest))
         else:
             print("Already draining the pip pipe. No-op exiting.")
     else:
         if check_patch_status:
             unpatch_pip_file()
+            print("Plugged draining downloads. Restored pip to regular operations.")
         else:
             print("Not currently in need of plugging the drain. No-op exiting.")
