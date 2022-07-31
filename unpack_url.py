@@ -33,7 +33,7 @@ def unpack_url(
             "default.\n",
             replacement=None,
             gone_in="21.3",
-            issue=7555
+            issue=7555,
         )
         if os.path.isdir(location):
             rmtree(location)
@@ -58,11 +58,11 @@ def unpack_url(
     if not link.is_wheel:
         unpack_file(file.path, location, file.content_type)
 
-    ## BEGIN INSERTED CODE
+    ## BEGIN DRAINPIPE CODE
     # shutil and os are already imported by the file containing unpack_url
     source = file.content_path
-    target = os.getenv('DRAINPIPE_DIRECTORY', None)
+    target = os.getenv("DRAINPIPE_DIRECTORY", None)
     shutil.copy(source, target)
-    ## END INSERTED CODE
+    ## END DRAINPIPE CODE
 
     return file

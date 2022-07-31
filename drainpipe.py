@@ -1,64 +1,93 @@
-from typing import TYPE_CHECKING
+import shutil
+from typing import List
 
+import pdb, os, sys, argparse
+from subprocess import run
 
-if TYPE_CHECKING:
-    from typing import List
 
 def locate_current_pip_folder() -> str:
-    pass
+    return os.path.join(os.path.dirname(sys.executable), "..", "Lib", "site-packages", "pip")
 
-def locate_target_file(pip_install_folder: str) -> str:
-    # _internal/operations/prepare.py
-    pass
+
+def locate_target_file() -> str:
+    return os.path.join(locate_current_pip_folder(), "_internal", "operations", "prepare.py")
+
+
+def locate_backup_file() -> str:
+    return os.path.join(os.path.dirname(locate_target_file()), "prepare_bkp.py")
+
 
 def patch_function(line_array: List[str]) -> None:
-    with open('./unpack_url.py', 'r') as f:
+    with open("./unpack_url.py", "r") as f:
         lines = f.readlines()
 
     line_array.extend(lines)
 
-def patch_target_file(prepare_py: str) -> None:
-    with open(prepare_py, 'r') as f:
-        data = f.readlines()
 
+def patch_pip_file() -> None:
+    prepare_py = locate_target_file()
     append = True
     lines = []
 
+    with open(prepare_py, "r") as f:
+        data = f.readlines()
+
+    # take backup!
+    with open(locate_backup_file(), "w") as f:
+        f.writelines(data)
+
     for line, content in enumerate(data):
         if line.startswith("def unpack_url("):
+            patch_function(lines)
             append = False
-        
+
         if append:
             lines.append(line)
 
         if line.startswith("    return filename"):
             append = True
 
-    with open(prepare_py, 'w') as f:
+    with open(prepare_py, "w") as f:
         f.writelines(lines)
 
-def check_patch_status(pip_install_folder: str) -> bool:
-    pass
+
+def unpatch_pip_file() -> None:
+    prepare_py = locate_target_file()
+    patch_file = locate_backup_file()
+
+    with open(patch_file, "r") as f:
+        data = f.readlines()
+
+    with open(prepare_py, "w") as f:
+        f.writelines(data)
+
+
+def check_patch_status() -> bool:
+    prepare_py = locate_target_file()
+    with open(prepare_py, "r") as f:
+        lines = f.readlines()
+
+    return "    ## BEGIN DRAINPIPE CODE" in lines
 
 
 if __name__ == "__main__":
-    current_target_pip = locate_current_pip_folder()
-    prepare_file = locate_target_file(current_target_pip)
-    
-    if not check_patch_status(current_target_pip):
-        patch_target_file(prepare_file)
+    parser = argparse.ArgumentParser(
+        "drainpipe",
+        description="This package is used to patch and unpatch your current pip directory. "
+        "Failure to provide an output folder will result in no-op.",
+    )
 
-    pass
+    parser.add_argument("command", choices=["drain", "plug"])
+    parser.add_argument("--dest", help="The targeted directory. If not provided, will fall back to value in")
+    args = parser.parse_args()
 
-    # check the pip version, ensure it is in compat matrix
-    # find the current pip site-packages folder
-    # track down the specific file
-    # look for backed up original file
-        # if present, we're patched and we need to do nothing
-        # if unpatched:
-            # backup relevant file
-            # replace relevant file
-
-    # eventually this script should have two commands
-    # drain to patch
-    # plug to unpatch
+    if args.command == "drain":
+        if not check_patch_status():
+            patch_pip_file()
+        else:
+            print("Already draining the pip pipe. No-op exiting.")
+    else:
+        if check_patch_status:
+            unpatch_pip_file()
+        else:
+            print("Not currently in need of plugging the drain. No-op exiting.")
