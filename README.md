@@ -1,6 +1,6 @@
 # drain**pip**e
 
-Drainpipe is an unstable solution to an dumb problem.
+Drainpipe is an unstable solution to a dumb problem.
 
 `pip` doesn't have a great way to actually dump the data that its downloaded. Yes, you can run `pip cache` and get a couple wheels, but in my experience you get incomplete results back.
 
