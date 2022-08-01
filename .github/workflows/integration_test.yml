@@ -41,7 +41,7 @@ jobs:
 
     - name: Test with pytest
       run: |
-        mkdir -p "$env:DRAINPIPE_DIRECTORY"
+        mkdir -p "$DRAINPIPE_DIRECTORY"
         python -m pip install --upgrade pip
         python ./drainpipe.py drain
 
