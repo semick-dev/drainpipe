@@ -1,9 +1,24 @@
+from asyncio import subprocess
 from typing import List
-import pdb, os, sys, argparse
+import os, sys, argparse
+from subprocess import check_output
+
+root_dir = os.path.dirname(__file__)
 
 
 def locate_current_pip_folder() -> str:
-    return os.path.join(os.path.dirname(sys.executable), "..", "Lib", "site-packages", "pip")
+    python_executable_folder = os.path.abspath(os.path.join(os.path.dirname(sys.executable), ".."))
+
+    for root, _, _ in os.walk(python_executable_folder, topdown=True):
+        # os.walk traverses top down. The very first directory that matches site-packages/pip
+        # will be the target
+        if os.path.join("site-packages", "pip") in root:
+            return root
+
+
+def get_current_pip_version() -> str:
+    result = check_output([sys.executable, "-m", "pip", "--version"])
+    return str(result).split(" ")[1]
 
 
 def locate_target_file() -> str:
@@ -14,11 +29,27 @@ def locate_backup_file() -> str:
     return os.path.join(os.path.dirname(locate_target_file()), "prepare_bkp.py")
 
 
-def patch_function(line_array: List[str], target_dir: str) -> None:
-    with open("./unpack_url.py", "r") as f:
-        lines = f.readlines()
+def get_modification_index(lines: List[str]) -> int:
+    for idx, line in enumerate(lines):
+        if "REPLACE_ME" in line:
+            return idx
+    raise Exception('Unable to locate a "REPLACE_ME" line.')
 
-    lines[58] = lines[58].replace("REPLACE_ME", target_dir.replace("\\", "/"))
+
+def patch_function(line_array: List[str], target_dir: str) -> None:
+    pip_version = get_current_pip_version()
+    patch = os.path.join(root_dir, "compatibility_patches", pip_version, "unpack_url.py")
+
+    if os.path.exists(patch):
+        with open(patch, "r") as f:
+            lines = f.readlines()
+            index = get_modification_index(lines)
+    else:
+        raise Exception(
+            'The current version of pip "{}" is not supported by drainpipe at this time.'.format(pip_version)
+        )
+
+    lines[index] = lines[index].replace("REPLACE_ME", target_dir.replace("\\", "/"))
 
     line_array.extend(lines)
 
@@ -53,6 +84,10 @@ def patch_pip_file(target_dir: str) -> None:
 def unpatch_pip_file() -> None:
     prepare_py = locate_target_file()
     patch_file = locate_backup_file()
+
+    if not os.path.exists(patch_file):
+        print("Backup file does not exist. Exiting.")
+        exit(1)
 
     with open(patch_file, "r") as f:
         data = f.readlines()
