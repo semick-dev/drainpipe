@@ -2,7 +2,7 @@
 
 Drainpipe is an unstable solution to a dumb problem.
 
-**Huge caveat. This method only works in virtual environments. A default `pip` install is a bundled exe that can't be patched in-place.**
+**Huge caveat. This method only works on a version of pip installed off of pypi. The bundled `pip.exe` cannot be patched in-place.
 
 `pip` doesn't have a great way to actually dump the data that its downloaded. Yes, you can run `pip cache` and get a couple wheels, but in my experience you get incomplete results back.
 
