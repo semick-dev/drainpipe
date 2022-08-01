@@ -44,13 +44,12 @@ jobs:
         mkdir -p "$env:DRAINPIPE_DIRECTORY"
         python -m pip install --upgrade pip
         python ./drainpipe.py drain
-      continue-on-error: true
-
-    # - uses: semick-dev/fbi-open-up@action/v1
-    #   with:
-    #     fbi-queue-cs: ${{ secrets.STORAGE_CONNECTION_STRING }}
 
     - name: Confirm patch working
       run: |
-        if [ $(ls | wc -l) == 0 ]; then echo 1; else echo 0; fi
-      shell: bash
+        $count = (Get-ChildItem -Path $env:DRAINPIPE_DIRECTORY).Count
+
+        if ($count -eq 0) {
+          exit 1
+        }
+      shell: pwsh
