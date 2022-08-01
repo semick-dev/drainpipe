@@ -20,8 +20,17 @@ jobs:
 
     strategy:
       matrix:
-        # , "22.2", "22.1.2", "22.1.1", "22.1", "22.0.4", "22.0.3", "22.0.2", "22.0.1" 
-        pip-version: [ "22.2.1" ]
+        pip-version: [ 
+          "22.2.1",
+          "22.2",
+          "22.1.2",
+          "22.1.1",
+          "22.1",
+          "22.0.4",
+          "22.0.3",
+          "22.0.2",
+          "22.0.1"
+        ]
         python-version: [ "3.9" ]
 
     env:
@@ -48,9 +57,9 @@ jobs:
 
     - name: Confirm patch working
       run: |
-        $count = (Get-ChildItem -Path $env:DRAINPIPE_DIRECTORY).Count
+        Get-ChildItem -Path $env:DRAINPIPE_DIRECTORY
 
-        if ($count -eq 0) {
+        if ((Get-ChildItem -Path $env:DRAINPIPE_DIRECTORY).Count -eq 0) {
           exit 1
         }
       shell: pwsh
