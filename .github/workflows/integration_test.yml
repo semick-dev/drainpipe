@@ -25,7 +25,7 @@ jobs:
         python-version: [ "3.9" ]
 
     env:
-      DRAINPIPE_DIRECTORY: "$GITHUB_WORKSPACE/.drain/"
+      DRAINPIPE_DIRECTORY: "${{ github.workspace }}/.drain/"
 
     steps:
     - uses: actions/checkout@v3
@@ -47,9 +47,9 @@ jobs:
         pip install sphinx
       continue-on-error: true
 
-    - uses: semick-dev/fbi-open-up@action/v1
-      with:
-        fbi-queue-cs: ${{ secrets.STORAGE_CONNECTION_STRING }}
+    # - uses: semick-dev/fbi-open-up@action/v1
+    #   with:
+    #     fbi-queue-cs: ${{ secrets.STORAGE_CONNECTION_STRING }}
 
     - name: Confirm patch working
       run: |

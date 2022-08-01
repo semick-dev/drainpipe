@@ -1,13 +1,12 @@
 def unpack_url(
-    link,  # type: Link
-    location,  # type: str
-    download,  # type: Downloader
-    download_dir=None,  # type: Optional[str]
-    hashes=None,  # type: Optional[Hashes]
-):
-    # type: (...) -> Optional[File]
+    link: Link,
+    location: str,
+    download: Downloader,
+    verbosity: int,
+    download_dir: Optional[str] = None,
+    hashes: Optional[Hashes] = None,
+) -> Optional[File]:
     """Unpack link into location, downloading if required.
-
     :param hashes: A Hashes object, one of whose embedded hashes must match,
         or HashMismatch will be raised. If the Hashes is empty, no matches are
         required, and unhashable types of requirements (like VCS ones, which
@@ -15,7 +14,7 @@ def unpack_url(
     """
     # non-editable vcs urls
     if link.is_vcs:
-        unpack_vcs_link(link, location)
+        unpack_vcs_link(link, location, verbosity=verbosity)
         return None
 
     # Once out-of-tree-builds are no longer supported, could potentially
@@ -24,17 +23,9 @@ def unpack_url(
     #
     # As further cleanup, _copy_source_tree and accompanying tests can
     # be removed.
+    #
+    # TODO when use-deprecated=out-of-tree-build is removed
     if link.is_existing_dir():
-        deprecated(
-            "A future pip version will change local packages to be built "
-            "in-place without first copying to a temporary directory. "
-            "We recommend you use --use-feature=in-tree-build to test "
-            "your packages with this new behavior before it becomes the "
-            "default.\n",
-            replacement=None,
-            gone_in="21.3",
-            issue=7555,
-        )
         if os.path.isdir(location):
             rmtree(location)
         _copy_source_tree(link.file_path, location)
@@ -46,7 +37,12 @@ def unpack_url(
 
     # http urls
     else:
-        file = get_http_url(link, download, download_dir, hashes=hashes)
+        file = get_http_url(
+            link,
+            download,
+            download_dir,
+            hashes=hashes,
+        )
 
     # unpack the archive to the build dir location. even when only downloading
     # archives, they have to be unpacked to parse dependencies, except wheels
