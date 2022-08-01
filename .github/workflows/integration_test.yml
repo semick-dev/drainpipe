@@ -44,6 +44,7 @@ jobs:
         mkdir -p "$DRAINPIPE_DIRECTORY"
         python -m pip install --upgrade pip
         python ./drainpipe.py drain
+        pip install sphinx
 
     - name: Confirm patch working
       run: |
