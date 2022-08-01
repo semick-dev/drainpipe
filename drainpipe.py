@@ -131,7 +131,7 @@ if __name__ == "__main__":
         else:
             print("Already draining the pip pipe. No-op exiting.")
     else:
-        if check_patch_status:
+        if check_patch_status():
             unpatch_pip_file()
             print("Plugged draining downloads. Restored pip to regular operations.")
         else:
